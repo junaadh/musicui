@@ -10,14 +10,27 @@
 
 #define ARRAY_LEN(xs) sizeof(xs) / sizeof(xs[0])
 
-uint32_t global_frames[1024] = {0};
+typedef struct {
+  float left;
+  float right;
+} Frame;
+
+Frame global_frames[4410*2] = {0};
 size_t global_frames_count = 0;
 
 void callback(void *bufferData, unsigned int frames) {
-  if (frames > ARRAY_LEN(global_frames))
-    frames = ARRAY_LEN(global_frames);
-  memcpy(global_frames, bufferData, sizeof(int32_t) * frames);
-  global_frames_count = frames;
+  size_t capacity = ARRAY_LEN(global_frames);
+  if (capacity - global_frames_count >= frames) {
+    memcpy(global_frames + global_frames_count, bufferData,
+           sizeof(Frame) * frames);
+    global_frames_count += frames;
+  } else if (frames <= capacity) {
+    memmove(global_frames, global_frames + frames,sizeof(Frame) * (capacity - frames));
+    memcpy(global_frames + (capacity - frames), bufferData, sizeof(Frame)*frames);
+  } else {
+    memcpy(global_frames, bufferData, sizeof(Frame)*capacity);
+    global_frames_count = capacity;
+  }
 }
 
 int main(void) {
@@ -56,16 +69,13 @@ int main(void) {
     ClearBackground(CLITERAL(Color){0x18, 0x18, 0x18, 0xff});
     float cellWidth = (float)w / global_frames_count;
     for (size_t i = 0; i < global_frames_count; ++i) {
-      int16_t sample = *(int16_t *)&global_frames[i];
-      if (sample > 0) {
-        float t = ((float)sample) / INT16_MAX;
-        DrawRectangle(i * cellWidth, (float)h/4 - (float)h/4*t, cellWidth, (float)h/4*t,RED);
+      float t = global_frames[i].left;
+      if (t > 0) {
+        DrawRectangle(i * cellWidth, (float)h / 4 - (float)h / 4 * t, 1, (float)h / 4 * t, BLUE);
       } else {
-        float t = ((float)sample)/ INT16_MIN;
-        DrawRectangle(i * cellWidth, h/4, cellWidth, (float)h/4*t,RED);
+        DrawRectangle(i * cellWidth, h / 4, 1, (float)h / 4 * t, RED);
       }
     }
-    // printf("\n");
     EndDrawing();
   }
   return 0;
