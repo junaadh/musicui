@@ -4,7 +4,8 @@ set -xe
 
 CFLAGS="-Wall -Wextra `pkg-config --cflags raylib`"
 LIBS="`pkg-config --libs raylib`"
-RAYLIB_PATH="/opt/homebrew/Cellar/raylib/5.0"
+source .env
 
-# clang $CFLAGS -o musicui main.c -I$RAYLIB_PATH/include -L$RAYLIB_PATH/lib -lraylib
-clang $CFLAGS -o musicui main.c $LIBS
+clang $CFLAGS -fPIC -shared -o build/libplug.dylib src/plug.c $LIBS
+
+clang $CFLAGS -o build/musicui src/musicui.c $LIBS

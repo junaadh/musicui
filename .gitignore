@@ -10,3 +10,6 @@
 # ignore all with .o extensions
 *.o
 */*.o
+
+# ignore build folder
+build/
