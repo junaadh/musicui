@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <complex.h>
 #include <math.h>
 #include <stddef.h>
@@ -5,10 +6,30 @@
 
 float pi;
 
+void fft(float in[], size_t stride, float complex out[], size_t n) {
+  assert(n > 0);
+
+  if (n == 1) {
+    out[0] = in[0];
+    return;
+  }
+
+  fft(in, stride * 2, out, n / 2);
+  fft(in + stride, stride * 2, out + n / 2, n / 2);
+
+  for (size_t k = 0; k < n / 2; ++k) {
+    float t = (float)k / n;
+    float complex calc = cexp(-2 * I * pi * t) * out[k + n / 2];
+    float complex prev = out[k];
+    out[k] = prev + calc;
+    out[k + n / 2] = prev - calc;
+  }
+}
+
 int main(void) {
   pi = atan2f(1, 1) * 4;
 
-  size_t n = 8;
+  size_t n = 3200;
   float in[n];
   float complex out[n];
 
@@ -60,7 +81,7 @@ int main(void) {
   // to print out the destructured version pf eular
   //
   printf("print out the destructure version\n\n");
-  
+
   for (size_t f = 0; f < n; ++f) {
     // out[f] = 0;
     // for (size_t i = 0; i < n; ++i) {
@@ -132,8 +153,11 @@ int main(void) {
   //
   //
   printf("final fft copy from wiki\n\n");
+  fft(in, 1, out, n);
 
-  // TODO: implement fft fully
+  // for (size_t f = 0; f < n; ++f) {
+    // printf("%02zu: %.2f, %.2f\n", f, creal(out[f]), cimag(out[f]));
+  // }
 
 #endif
 
