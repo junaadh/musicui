@@ -82,7 +82,7 @@ void plug_update(Plug *plug) {
     SetMusicVolume(plug->music, volume < 1 ? volume = volume + 0.05f : volume);
   } else if (IsKeyPressed(KEY_DOWN)) {
     SetMusicVolume(plug->music, volume > 0 ? volume = volume - 0.05f : volume);
-  }
+  } 
 
   int w = GetRenderWidth();
   int h = GetRenderHeight();
@@ -102,7 +102,7 @@ void plug_update(Plug *plug) {
   for (size_t i = 0; i < N; ++i) {
     float t = ampCalc(out[i]); /// max;
     DrawRectangle(i * cellWidth, (float)h / 4 - (float)h / 4 * t, 1,
-                  (float)h / 4 * t, BLUE);
+                  (float)h / 4 * t, GRAY);
   }
   EndDrawing();
 }

@@ -20,8 +20,6 @@ plug_init_t plug_init = NULL;
 plug_update_t plug_update = NULL;
 Plug plug = {0};
 
-
-
 const char *shift_args(int *argc, const char ***argv) {
   assert(*argv > 0);
   const char *result = (**argv);
@@ -34,7 +32,7 @@ bool init_libs(void) {
   if (libplug != NULL)
     dlclose(libplug);
 
-  void *libplug = dlopen(libplug_file_name, RTLD_NOW);
+  libplug = dlopen(libplug_file_name, RTLD_NOW);
   if (libplug == NULL) {
     fprintf(stderr, "ERROR: couldnt load %s: %s", libplug_file_name, dlerror());
     return false;
@@ -46,6 +44,7 @@ bool init_libs(void) {
             libplug_file_name);
     return false;
   }
+
   plug_update = dlsym(libplug, "plug_update");
   if (plug_update == NULL) {
     fprintf(stderr, "ERROR: couldnt find plug_update symbol in %s",
@@ -74,8 +73,7 @@ int main(int argc, const char **argv) {
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_R)) {
-      if (!init_libs())
-        return 1;
+      if(!init_libs()) return 1;
     }
     plug_update(&plug);
   }
