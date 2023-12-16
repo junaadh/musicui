@@ -4,6 +4,9 @@
 #include <math.h>
 #include <raylib.h>
 #include <stdio.h>
+#include <string.h>
+
+#define N (1<<15)
 
 typedef struct {
   float left;
@@ -44,14 +47,11 @@ void fft(float in[], size_t stride, float complex out[], size_t n) {
 }
 
 void callback(void *bufferData, unsigned int frames) {
-  if (frames < N) {
-    return;
-  }
-
   Frame *frame = bufferData;
 
   for (size_t i = 0; i < frames; ++i) {
-    in[i] = frame[i].left;
+    memmove(in, in + 1, (N - 1)*sizeof(in[0]));
+    in[N-1] = frame[i].left;
   }
 }
 
@@ -98,11 +98,11 @@ void plug_update(Plug *plug) {
     if (max < a)
       max = a;
   }
-  float cellWidth = (float)w / N;
+  float cellWidth = ((float)w / 2) / N;
   for (size_t i = 0; i < N; ++i) {
-    float t = ampCalc(out[i]); /// max;
-    DrawRectangle(i * cellWidth, (float)h / 4 - (float)h / 4 * t, 1,
-                  (float)h / 4 * t, RED);
+    float t = ampCalc(out[i])/max;
+    DrawRectangle(i * cellWidth, (float)h / 4 - (float)h / 4 * t, 2,
+                  (float)h / 4 * t, GREEN);
   }
   EndDrawing();
 }

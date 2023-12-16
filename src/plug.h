@@ -4,8 +4,6 @@
 #include <raylib.h>
 #include <stddef.h>
 
-#define N 256
-
 typedef struct {
   size_t version;
   Music music;
@@ -18,4 +16,4 @@ typedef void (*plug_pre_hotreload_t)(Plug *plug);
 typedef void (*plug_post_hotreload_t)(Plug *plug);
 typedef void (*plug_update_t)(Plug *plug);
 
-#endif
+#endif // plug.h
