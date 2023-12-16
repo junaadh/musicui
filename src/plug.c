@@ -3,10 +3,11 @@
 #include <complex.h>
 #include <math.h>
 #include <raylib.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
-#define N (1<<15)
+#define N (1 << 15)
 
 typedef struct {
   float left;
@@ -50,8 +51,8 @@ void callback(void *bufferData, unsigned int frames) {
   Frame *frame = bufferData;
 
   for (size_t i = 0; i < frames; ++i) {
-    memmove(in, in + 1, (N - 1)*sizeof(in[0]));
-    in[N-1] = frame[i].left;
+    memmove(in, in + 1, (N - 1) * sizeof(in[0]));
+    in[N - 1] = frame[i].left;
   }
 }
 
@@ -82,6 +83,9 @@ void plug_update(Plug *plug) {
     SetMusicVolume(plug->music, volume < 1 ? volume = volume + 0.05f : volume);
   } else if (IsKeyPressed(KEY_DOWN)) {
     SetMusicVolume(plug->music, volume > 0 ? volume = volume - 0.05f : volume);
+  } else if (IsKeyPressed(KEY_Q)) {
+    StopMusicStream(plug->music);
+    PlayMusicStream(plug->music);
   }
 
   int w = GetRenderWidth();
@@ -98,11 +102,28 @@ void plug_update(Plug *plug) {
     if (max < a)
       max = a;
   }
-  float cellWidth = ((float)w / 2) / N;
-  for (size_t i = 0; i < N; ++i) {
-    float t = ampCalc(out[i])/max;
-    DrawRectangle(i * cellWidth, (float)h / 4 - (float)h / 4 * t, 2,
-                  (float)h / 4 * t, GREEN);
+
+  float step = 1.06f;
+  size_t m = 0;
+  for (float f = 20.0f; (size_t)f < N; f *= step) {
+    m += 1;
+  }
+
+  float cellWidth = ((float)w / 2) / m;
+  m = 0;
+  // for (size_t i = 0; i < N; ++i) {
+  for (float i = 20.0f; (size_t)i < N; i *= step) {
+    float f1 = i * step;
+    float a = 0.0f;
+    for (size_t q = (size_t)i; q < N && q < (size_t)f1; ++q) {
+      a += ampCalc(out[q]);
+    }
+    a /= (size_t)f1 - (size_t)i + 1;
+    float t =  a / max;
+    Color c = ColorAlphaBlend(RED, ColorAlpha(GREEN, t), WHITE);
+    DrawRectangle(m * cellWidth, (float)h / 4 - (float)h / 4 * t, cellWidth,
+                  (float)h / 4 * t, c);
+    m += 1;
   }
   EndDrawing();
 }

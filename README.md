@@ -2,6 +2,8 @@
 
   - music visualiser in c
   - using raylib
+  - hot reloadable
+  - currently only macos
 
 ## WORK IN PROGRESS
 
@@ -15,9 +17,17 @@
 
 * to run binary
 ``` sh
-  ./musicui <PATH_TO_MUSIC>
+  ./build/musicui <PATH_TO_MUSIC>
 ```
 
-- **Linker might struggle to find the dll**
-- **Currently only support .dylib i.e. macos**
-- **will be adding linux support with .so soon**
+**when trying to execute binary sometimes the dyldlib path is not set so incase try again after below command**
+``` sh
+  source .env
+``` 
+
+## KEY MAP
+
+  - Key_UP/ KEY_DOWN : volume increase / decrease
+  - Key_SPACE : pause music
+  - Key_Q : restart the song
+  - Key_R : reload the binaries
