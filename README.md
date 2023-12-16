@@ -18,6 +18,6 @@
   ./musicui <PATH_TO_MUSIC>
 ```
 
-** Linker might struggle to find the dll **
-** Currently only support .dylib i.e. macos **
-** will be adding linux support with .so soon **
+- **Linker might struggle to find the dll**
+- **Currently only support .dylib i.e. macos**
+- **will be adding linux support with .so soon**

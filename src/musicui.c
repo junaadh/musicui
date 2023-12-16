@@ -18,6 +18,8 @@ void *libplug = NULL;
 plug_hello_t plug_hello = NULL;
 plug_init_t plug_init = NULL;
 plug_update_t plug_update = NULL;
+plug_pre_hotreload_t plug_pre_hotreload = NULL;
+plug_post_hotreload_t plug_post_hotreload = NULL;
 Plug plug = {0};
 
 const char *shift_args(int *argc, const char ***argv) {
@@ -40,17 +42,30 @@ bool init_libs(void) {
 
   plug_init = dlsym(libplug, "plug_init");
   if (plug_init == NULL) {
-    fprintf(stderr, "ERROR: couldnt find plug_init symbol in %s",
-            libplug_file_name);
+    fprintf(stderr, "ERROR: couldnt find plug_init symbol in %s: %s",
+            libplug_file_name, dlerror());
     return false;
   }
 
   plug_update = dlsym(libplug, "plug_update");
   if (plug_update == NULL) {
-    fprintf(stderr, "ERROR: couldnt find plug_update symbol in %s",
-            libplug_file_name);
+    fprintf(stderr, "ERROR: couldnt find plug_update symbol in %s: %s",
+            libplug_file_name, dlerror());
     return false;
   }
+
+  plug_pre_hotreload = dlsym(libplug, "plug_pre_hotreload");
+  if (plug_pre_hotreload == NULL) {
+    fprintf(stderr, "ERROR: couldnt find plug_pre_hotreload symbol in %s: %s ", libplug_file_name, dlerror());
+    return false;
+  }
+  
+  plug_post_hotreload = dlsym(libplug, "plug_post_hotreload");
+  if (plug_post_hotreload == NULL) {
+    fprintf(stderr, "ERROR: couldnt find plug_post_hotreload symbol in %s: %s ", libplug_file_name, dlerror());
+    return false;
+  }
+
   return true;
 }
 
@@ -73,7 +88,9 @@ int main(int argc, const char **argv) {
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_R)) {
+      plug_pre_hotreload(&plug);
       if(!init_libs()) return 1;
+      plug_post_hotreload(&plug);
     }
     plug_update(&plug);
   }
