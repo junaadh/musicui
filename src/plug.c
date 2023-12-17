@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define N (1 << 15)
+#define N 25000 //(1 << 15)
 
 typedef struct {
   float left;
@@ -105,14 +105,14 @@ void plug_update(Plug *plug) {
 
   float step = 1.06f;
   size_t m = 0;
-  for (float f = 20.0f; (size_t)f < N; f *= step) {
+  for (float f = 10.0f; (size_t)f < N; f *= step) {
     m += 1;
   }
 
   float cellWidth = ((float)w / 2) / m;
   m = 0;
   // for (size_t i = 0; i < N; ++i) {
-  for (float i = 20.0f; (size_t)i < N; i *= step) {
+  for (float i = 10.0f; (size_t)i < N; i *= step) {
     float f1 = i * step;
     float a = 0.0f;
     for (size_t q = (size_t)i; q < N && q < (size_t)f1; ++q) {
@@ -121,8 +121,9 @@ void plug_update(Plug *plug) {
     a /= (size_t)f1 - (size_t)i + 1;
     float t =  a / max;
     Color c = ColorAlphaBlend(RED, ColorAlpha(GREEN, t), WHITE);
-    DrawRectangle(m * cellWidth, (float)h / 4 - (float)h / 4 * t, cellWidth,
-                  (float)h / 4 * t, c);
+    DrawRectangle(m * cellWidth, (float)h / 4 - (float)h / 4 * t, cellWidth,(float)h / 4 * t, c);
+    // DrawRectangle(m * cellWidth, (float)h / 4 + ((float) h*4)/t , cellWidth,(float)h / 4 * t, c);
+    // DrawCircle(m * cellWidth, (float)h / 4,(float)h / 4 * t, c);
     m += 1;
   }
   EndDrawing();

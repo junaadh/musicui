@@ -3,17 +3,25 @@
   - music visualiser in c
   - using raylib
   - hot reloadable
+  - can toggle release profile
+  - release profile createds one static linked exec
   - currently only macos
 
 ## WORK IN PROGRESS
 
 ## USAGE
 
-* to build the binary
+* to build the binary development
+  - hot reloadable
 ``` sh
   ./build.sh
 ```
 
+* to build the binary release
+  - non hot reloadable
+``` sh
+  ./build.sh --release
+```
 
 * to run binary
 ``` sh
