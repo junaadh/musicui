@@ -14,24 +14,23 @@
 #define ARRAY_LEN(xs) sizeof(xs) / sizeof(xs[0])
 
 #ifdef HOTRELOAD
-#define PLUG(name) name##_t *name = NULL;
+#define PLUG(name, ...) name##_t *name = NULL;
 #else
-#define PLUG(name) name##_t name;
+#define PLUG(name, ...) name##_t name;
 #endif
 LIST_OF_PLUGS
 #undef PLUG
 
 const char *libplug_file_name = "libplug.dylib";
 void *libplug = NULL;
-Plug plug = {0};
 
-const char *shift_args(int *argc, const char ***argv) {
-  assert(*argv > 0);
-  const char *result = (**argv);
-  (*argv) += 1;
-  (*argc) -= 1;
-  return result;
-}
+// const char *shift_args(int *argc, const char ***argv) {
+//   assert(*argv > 0);
+//   const char *result = (**argv);
+//   (*argv) += 1;
+//   (*argc) -= 1;
+//   return result;
+// }
 
 #ifdef HOTRELOAD
 bool init_libs(void) {
@@ -44,7 +43,7 @@ bool init_libs(void) {
     return false;
   }
 
-  #define PLUG(name) \
+  #define PLUG(name, ...) \
   name = dlsym(libplug, #name); \
   if (name == NULL) { \
     fprintf(stderr, "ERROR: couldnt find %s symbol in %s: %s", \
@@ -60,30 +59,23 @@ bool init_libs(void) {
 #define init_libs() true
 #endif
 
-int main(int argc, const char **argv) {
+int main(void) {
   if (!init_libs())
     return 1;
-
-  const char *program = shift_args(&argc, &argv);
-  if (argc == 0) {
-    fprintf(stderr, "Usage:  %s <input>\n", program);
-    return 1;
-  }
-  const char *file_path = shift_args(&argc, &argv);
 
   InitWindow(800, 600, "MusicUI");
   SetTargetFPS(60);
   InitAudioDevice();
 
-  plug_init(&plug, file_path);
+  plug_init();
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_R)) {
-      plug_pre_hotreload(&plug);
+      void* state = plug_pre_hotreload();
       if(!init_libs()) return 1;
-      plug_post_hotreload(&plug);
+      plug_post_hotreload(state);
     }
-    plug_update(&plug);
+    plug_update();
   }
   return 0;
 }
