@@ -16,3 +16,6 @@ build/
 
 # ignore music folder
 music/
+
+# ignore mac finder cache
+.DS_Store

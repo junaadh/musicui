@@ -9,6 +9,7 @@
 #include <string.h>
 
 #define N 25000 //(1 << 15)
+#define FONT_SIZE 48
 
 typedef struct {
   float left;
@@ -17,6 +18,7 @@ typedef struct {
 
 typedef struct {
   Music music;
+  Font font;
   bool error;
 } Plug;
 
@@ -67,6 +69,8 @@ void plug_init(void) {
   plug = malloc(sizeof(*plug));
   assert(plug != NULL && "NOMO RAM!");
   memset(plug, 0, sizeof(*plug));
+
+  plug->font = LoadFontEx("fonts/dank-mono.ttf", FONT_SIZE, NULL, 0);
 }
 
 void plug_update() {
@@ -181,18 +185,19 @@ void plug_update() {
   } else {
     const char *msg;
     Color color;
-    int font;
     if (plug->error) {
       msg = "Cudnt Load FILE Bruh";
-      font = 60;
       color = RED;
     } else {
       msg = "DRAG MUSIC HERE!";
-      font = 69;
       color = BLUE;
     }
-    int width = MeasureText(msg, font)/2;
-    DrawText(msg, w/4 - width, h/4 - font/4, font, color);
+    Vector2 vec = MeasureTextEx(plug->font, msg, plug->font.baseSize, 0);
+    Vector2 pos = {
+      (float) w/4 - vec.x/2,
+      (float) h/4 - vec.y/2. 
+    };
+    DrawTextEx(plug->font, msg, pos, plug->font.baseSize, 0, color);
   }
   EndDrawing();
 }
