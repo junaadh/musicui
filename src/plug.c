@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define N 25000 //(1 << 15)
+#define N (1 << 13)
 #define FONT_SIZE 48
 
 typedef struct {
@@ -28,12 +28,13 @@ float complex out[N];
 float volume = 0.5f;
 
 float ampCalc(float complex x) {
-  float a = fabs(creal(x));
-  float b = fabs(cimag(x));
+  // float a = fabs(creal(x));
+  // float b = fabs(cimag(x));
 
-  if (a > b)
-    return a;
-  return b;
+  // if (a > b)
+  //   return a;
+  // return b;
+  return cabsf(x);
 }
 
 void fft(float in[], size_t stride, float complex out[], size_t n) {
@@ -144,42 +145,45 @@ void plug_update() {
 
     float step = 1.06f;
     float max = 0.0f;
-    for (size_t i = 0; i < N; ++i) {
+    for (size_t i = 0; i < N / 2; ++i) {
       float a = ampCalc(out[i]);
       if (max < a)
         max = a;
     }
 
     size_t m = 0;
-    for (float f = 10.0f; (size_t)f < N; f *= step) {
+    float lowf = 1.0f;
+    for (float f = lowf; (size_t)f < N / 2; f = ceil(f * step)) {
       m += 1;
     }
 
     float cellWidth = ((float)w / 2) / m;
     m = 0;
-    // for (size_t i = 0; i < N; ++i) {
-    for (float i = 10.0f; (size_t)i < N; i *= step) {
-      float f1 = i * step;
+    // for (size_t i = 0; i < N/2/2; ++i) {
+    for (float i = lowf; (size_t)i < N / 2; i = ceil(i * step)) {
+      float f1 = ceil(i * step);
       float a = 0.0f;
-      for (size_t q = (size_t)i; q < N && q < (size_t)f1; ++q) {
-        a += ampCalc(out[q]);
+      for (size_t q = (size_t)i; q < N / 2 && q < (size_t)f1; ++q) {
+        float high = ampCalc(out[q]);
+        if (a < high)
+          a = high;
       }
-      a /= (size_t)f1 - (size_t)i + 1;
+      // a /= (size_t)f1 - (size_t)i + 1;
       float t = a / max;
       // if (t < 0.01f) {
       //     t = 0.01f;
       //   }
-      Color c = ColorAlphaBlend(RED, ColorAlpha(GREEN, t), WHITE);
+      Color c = ColorAlphaBlend(RED, ColorAlpha(GREEN, t), YELLOW);
       double screen_height = (double)h / 4;
       double wave_height = screen_height * (double)t;
-      if (wave_height < 1) {
-        wave_height = 1;
-      }
+      // if (wave_height < 1) {
+      //   wave_height = 1;
+      // }
       DrawRectangle(m * cellWidth, screen_height - wave_height, cellWidth,
                     wave_height, c);
-      // DrawRectangle(m * cellWidth, (float)h / 4 + ((float) h*4)/t ,
-      // cellWidth,(float)h / 4 * t, c); DrawCircle(m * cellWidth, (float)h /
-      // 4,(float)h / 4 * t, c);
+      // DrawRectangle(m * cellWidth, (float)h / 4 + ((float)h * 4) / t,
+      // cellWidth, (float)h / 4 * t, c);
+      // DrawCircle(m * cellWidth, (float)h / 4, (float)h / 4 * t, c);
       m += 1;
     }
   } else {
@@ -193,10 +197,7 @@ void plug_update() {
       color = BLUE;
     }
     Vector2 vec = MeasureTextEx(plug->font, msg, plug->font.baseSize, 0);
-    Vector2 pos = {
-      (float) w/4 - vec.x/2,
-      (float) h/4 - vec.y/2. 
-    };
+    Vector2 pos = {(float)w / 4 - vec.x / 2, (float)h / 4 - vec.y / 2.};
     DrawTextEx(plug->font, msg, pos, plug->font.baseSize, 0, color);
   }
   EndDrawing();
