@@ -23,7 +23,8 @@ typedef struct {
 } Plug;
 
 Plug *plug = NULL;
-float in[N];
+float in1[N];
+float in2[N];
 float complex out[N];
 float volume = 0.5f;
 
@@ -34,7 +35,10 @@ float ampCalc(float complex x) {
   // if (a > b)
   //   return a;
   // return b;
-  return cabsf(x);
+  // float a = cabsf(x);
+  float a = crealf(x);
+  float b = cimagf(x);
+  return logf(a * a + b * b);
 }
 
 void fft(float in[], size_t stride, float complex out[], size_t n) {
@@ -61,8 +65,8 @@ void callback(void *bufferData, unsigned int frames) {
   float(*frame)[plug->music.stream.channels] = bufferData;
 
   for (size_t i = 0; i < frames; ++i) {
-    memmove(in, in + 1, (N - 1) * sizeof(in[0]));
-    in[N - 1] = frame[i][0];
+    memmove(in1, in1 + 1, (N - 1) * sizeof(in1[0]));
+    in1[N - 1] = frame[i][0];
   }
 }
 
@@ -141,7 +145,13 @@ void plug_update() {
   ClearBackground(CLITERAL(Color){0x18, 0x18, 0x18, 0xff});
 
   if (IsMusicReady(plug->music)) {
-    fft(in, 1, out, N);
+    for (size_t i = 0; i < N; ++i) {
+      float t = (float)i / N;
+      float hann = 0.5 - 0.5 * cosf(2 * PI * t);
+      in2[i] = in1[i] * hann;
+    }
+
+    fft(in2, 1, out, N);
 
     float step = 1.06f;
     float max = 0.0f;
